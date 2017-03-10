@@ -13,6 +13,12 @@ var canvas;
 var canvasContext;
 var ballX = 50;
 var ballY = 50;
+var ballSpeedX = 25;
+var ballSpeedY = 5;
+var paddle1Y = 250;
+var paddle2Y = 250; 
+const PADDLE_HEIGHT = 100;
+const PADDLE_WIDTH = 10;
 	window.onload = function()
 	{
 		canvas = document.getElementById('gameCanvas');
@@ -22,20 +28,81 @@ var ballY = 50;
 			moveEverything();
 			drawEevrything();
 		}, 1000/framesPerSecond);
+
+		canvas.addEventListener('mousemove',function(evt) {
+			var mousePos = calculateMousePos(evt);
+			paddle1Y = mousePos.y - (PADDLE_HEIGHT/2);
+			paddle2Y = mousePos.y - (PADDLE_HEIGHT/2);
+		});
 		
 	}
 	function moveEverything()
 	{
-				ballX += 5;
+				ballX += ballSpeedX;
+				ballY += ballSpeedY;
+				if(ballX > canvas.width)
+					{
+					if(ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT)
+					{
+						ballSpeedX = -ballSpeedX;
+					}
+					else
+					{
+						ballReset();
+					}
+					}
+				if(ballY > canvas.height || ballY <0)
+				{
+					ballSpeedY *= -1;
+				}
+				if(ballX < 0)
+				{
+					if(ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT)
+					{
+						ballSpeedX = -ballSpeedX;
+					}
+					else
+					{
+						ballReset();
+					}
+				}
 	}
 	function drawEevrything()
 	{
-		canvasContext.fillStyle = "black";
-		canvasContext.fillRect(0,0,canvas.width, canvas.height);
-		canvasContext.fillStyle = 'white';
-		canvasContext.fillRect(0,210,10,100);
-		canvasContext.fillStyle = "red";
-		canvasContext.fillRect(ballX,200,10,10);
+		colorRect(0,0,canvas.width, canvas.height,'black');
+		colorRect(0,paddle1Y,PADDLE_WIDTH,PADDLE_HEIGHT,'white');
+		colorRect(canvas.width-PADDLE_WIDTH,paddle2Y,PADDLE_WIDTH,PADDLE_HEIGHT,'white');
+		colorCircle(ballX,ballY,10,'white');
+	}
+
+	function colorCircle(centerX, centerY, radius, drawColor)
+	{
+		canvasContext.fillStyle = drawColor;
+		canvasContext.beginPath();
+		canvasContext.arc(centerX,centerY,radius,0,Math.PI*2, true);
+		canvasContext.fill();
+	}
+	function colorRect(leftX, topY, width, height, drawColor)
+	{
+		canvasContext.fillStyle = drawColor;
+		canvasContext.fillRect(leftX,topY,width,height);
+	}
+
+	function ballReset()
+	{
+		ballX = canvas.width/2;
+		ballY = canvas.height/2;
+	}
+	function calculateMousePos(evt)
+	{
+		var rect = canvas.getBoundingClientRect();
+		var root = document.documentElement;
+		var mouseX = evt.clientX - rect.left - root.scrollLeft;
+		var mouseY = evt.clientY - rect.top -root.scrollTop;
+		return {
+			x:mouseX,
+			y:mouseY
+		};
 	}
 </script>
 </html>
